@@ -4,8 +4,7 @@
 .env*.local
 .env
 
-# Database Prisma generated files
-/src/generated/prisma
+
 
 # dependencies
 node_modules/
