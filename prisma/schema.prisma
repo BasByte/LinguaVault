@@ -1,0 +1,239 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Database Tables
+enum Role {
+  admin
+  manager
+  educator
+  standard  
+  free_tier
+}
+
+model badges {
+  id            Int           @id @default(autoincrement())
+  name          String        @db.VarChar(100)
+  description   String?
+  icon          String?       @db.VarChar(50)
+  badge_type    String        @db.VarChar(50)
+  criteria      Json?
+  points_reward Int           @default(0)
+  created_at    DateTime      @default(now()) @db.Timestamp(6)
+  user_badges   user_badges[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model course_ratings {
+  id         Int      @id @default(autoincrement())
+  user_id    Int?
+  course_id  Int?
+  rating     Int?
+  review     String?
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  courses    courses? @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users      users?   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([user_id, course_id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model courses {
+  id               Int              @id @default(autoincrement())
+  title            String           @db.VarChar(255)
+  description      String?
+  language_id      Int?
+  educator_id      Int?
+  level            String           @default("beginner") @db.VarChar(20)
+  thumbnail_url    String?
+  is_public        Boolean          @default(true)
+  is_published     Boolean          @default(false)
+  enrollment_count Int              @default(0)
+  rating           Decimal?         @default(0.0) @db.Decimal(3, 2)
+  duration_minutes Int?             @default(0)
+  tags             String[]
+  created_at       DateTime         @default(now()) @db.Timestamp(6)
+  updated_at       DateTime         @default(now()) @db.Timestamp(6)
+  course_ratings   course_ratings[]
+  users            users?           @relation(fields: [educator_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  languages        languages?       @relation(fields: [language_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  enrollments      enrollments[]
+  lessons          lessons[]
+  user_progress    user_progress[]
+}
+
+model enrollments {
+  id                  Int       @id @default(autoincrement())
+  user_id             Int?
+  course_id           Int?
+  enrolled_at         DateTime  @default(now()) @db.Timestamp(6)
+  completed_at        DateTime? @db.Timestamp(6)
+  progress_percentage Int       @default(0)
+  courses             courses?  @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users               users?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([user_id, course_id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model exercises {
+  id             Int      @id @default(autoincrement())
+  lesson_id      Int?
+  exercise_type  String   @db.VarChar(50)
+  question       String
+  options        Json?
+  correct_answer String
+  explanation    String?
+  points         Int      @default(10)
+  order_index    Int      @default(0)
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+  lessons        lessons? @relation(fields: [lesson_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model languages {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(100)
+  code        String    @unique @db.VarChar(10)
+  flag_emoji  String?   @db.VarChar(10)
+  description String?
+  is_active   Boolean   @default(true)
+  created_at  DateTime  @default(now()) @db.Timestamp(6)
+  courses     courses[]
+  tests       tests[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model lessons {
+  id               Int             @id @default(autoincrement())
+  course_id        Int?
+  title            String          @db.VarChar(255)
+  content          String?
+  lesson_type      String          @default("lesson") @db.VarChar(50)
+  order_index      Int             @default(0)
+  duration_minutes Int?            @default(0)
+  is_published     Boolean         @default(false)
+  media_url        String?
+  created_at       DateTime        @default(now()) @db.Timestamp(6)
+  updated_at       DateTime        @default(now()) @db.Timestamp(6)
+  exercises        exercises[]
+  courses          courses?        @relation(fields: [course_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user_progress    user_progress[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model test_attempts {
+  id                 Int       @id @default(autoincrement())
+  user_id            Int?
+  test_id            Int?
+  score              Int?
+  percentage         Decimal?  @db.Decimal(5, 2)
+  cefr_result        String?   @db.VarChar(5)
+  answers            Json?
+  time_spent_seconds Int?
+  status             String    @default("in_progress") @db.VarChar(20)
+  started_at         DateTime  @default(now()) @db.Timestamp(6)
+  completed_at       DateTime? @db.Timestamp(6)
+  tests              tests?    @relation(fields: [test_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users              users?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model test_questions {
+  id             Int      @id @default(autoincrement())
+  test_id        Int?
+  question       String
+  question_type  String   @db.VarChar(50)
+  options        Json?
+  correct_answer String
+  explanation    String?
+  points         Int      @default(10)
+  order_index    Int      @default(0)
+  audio_url      String?
+  image_url      String?
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+  tests          tests?   @relation(fields: [test_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model tests {
+  id               Int              @id @default(autoincrement())
+  title            String           @db.VarChar(255)
+  description      String?
+  educator_id      Int?
+  language_id      Int?
+  cefr_level       String           @db.VarChar(5)
+  duration_minutes Int              @default(60)
+  passing_score    Int              @default(60)
+  is_public        Boolean          @default(false)
+  is_published     Boolean          @default(false)
+  attempt_count    Int              @default(0)
+  created_at       DateTime         @default(now()) @db.Timestamp(6)
+  updated_at       DateTime         @default(now()) @db.Timestamp(6)
+  test_attempts    test_attempts[]
+  test_questions   test_questions[]
+  users            users?           @relation(fields: [educator_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  languages        languages?       @relation(fields: [language_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model user_badges {
+  id        Int      @id @default(autoincrement())
+  user_id   Int?
+  badge_id  Int?
+  earned_at DateTime @default(now()) @db.Timestamp(6)
+  badges    badges?  @relation(fields: [badge_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users     users?   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([user_id, badge_id])
+}
+
+model user_progress {
+  id                  Int       @id @default(autoincrement())
+  user_id             Int?
+  course_id           Int?
+  lesson_id           Int?
+  is_completed        Boolean   @default(false)
+  progress_percentage Int       @default(0)
+  time_spent_seconds  Int       @default(0)
+  last_accessed_at    DateTime  @default(now()) @db.Timestamp(6)
+  completed_at        DateTime? @db.Timestamp(6)
+  courses             courses?  @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lessons             lessons?  @relation(fields: [lesson_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users               users?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([user_id, lesson_id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model users {
+  id             Int              @id @default(autoincrement())
+  name           String           @db.VarChar(255)
+  email          String           @unique @db.VarChar(255)
+  password_hash  String?          @db.VarChar(255)
+  role           Role             @default(standard)
+  avatar_url     String?
+  bio            String?
+  total_points   Int              @default(0)
+  streak_days    Int              @default(0)
+  is_active      Boolean          @default(true)
+  created_at     DateTime         @default(now()) @db.Timestamp(6)
+  updated_at     DateTime         @default(now()) @db.Timestamp(6)
+  course_ratings course_ratings[]
+  courses        courses[]
+  enrollments    enrollments[]
+  test_attempts  test_attempts[]
+  tests          tests[]
+  user_badges    user_badges[]
+  user_progress  user_progress[]
+}
+
+
