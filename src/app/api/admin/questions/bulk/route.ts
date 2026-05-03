@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       test_id: parseInt(test_id),
       question: q.question.trim(),
       question_type: q.question_type,
-      options: q.options && q.options.filter(Boolean).length > 0 ? q.options.filter(Boolean) : null,
+      options: q.options && q.options.filter(Boolean).length > 0 ? q.options.filter(Boolean) : undefined,
       correct_answer: q.correct_answer.trim(),
       explanation: q.explanation?.trim() || null,
       points: q.points > 0 ? q.points : 10,

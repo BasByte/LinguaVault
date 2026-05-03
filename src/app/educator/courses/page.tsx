@@ -23,7 +23,7 @@ export default async function CoursesPage() {
     level: c.level,
     is_published: c.is_published,
     enrollment_count: c.enrollment_count,
-    duration_minutes: c.duration_minutes,
+    duration_minutes: c.duration_minutes ?? 0,
     lesson_count: c._count.lessons,
     language_name: c.languages?.name ?? "",
     flag_emoji: c.languages?.flag_emoji ?? "🌐",

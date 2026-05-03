@@ -8,7 +8,7 @@ export default async function AdminCourseEditPage({ params }: { params: Promise<
   const { id } = await params;
   const courseId = parseInt(id);
 
-  const [course, lessons, languages] = await Promise.all([
+  const [course, lessonsResult, languagesResult] = await Promise.all([
     prisma.courses.findUnique({
       where: { id: courseId },
       include: { languages: { select: { name: true, flag_emoji: true } } },
@@ -23,6 +23,19 @@ export default async function AdminCourseEditPage({ params }: { params: Promise<
     }),
     prisma.languages.findMany({ where: { is_active: true }, orderBy: { name: "asc" }, select: { id: true, name: true, flag_emoji: true } }),
   ]);
+
+  // Transform lessons to match Lesson interface (handle null values)
+  const lessons = lessonsResult.map((l) => ({
+    ...l,
+    duration_minutes: l.duration_minutes ?? 0,
+    content: l.content ?? "",
+  }));
+
+  // Transform languages to ensure flag_emoji is never null (matches Language interface)
+  const languages = languagesResult.map((l) => ({
+    ...l,
+    flag_emoji: l.flag_emoji ?? "",
+  }));
 
   if (!course) notFound();
 

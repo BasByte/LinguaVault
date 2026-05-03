@@ -5,7 +5,6 @@
 .env
 
 
-
 # dependencies
 node_modules/
 /.pnp
@@ -13,6 +12,7 @@ node_modules/
 
 # testing
 /coverage
+errors.*
 
 # next.js
 .next/

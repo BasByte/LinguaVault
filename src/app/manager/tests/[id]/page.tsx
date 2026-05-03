@@ -36,6 +36,9 @@ export default async function ManagerTestEditPage({ params }: { params: Promise<
     explanation: q.explanation, points: q.points, order_index: q.order_index,
   }));
 
+  const languagesForEditor = languages.map((l) => ({ id: l.id, name: l.name, flag_emoji: l.flag_emoji ?? "🌐" }));
+
+
   return (
     <div className="p-6 space-y-5">
       <div className="flex items-center gap-3">
@@ -50,7 +53,7 @@ export default async function ManagerTestEditPage({ params }: { params: Promise<
           <p className="text-xs text-gray-500">Edit test details and manage questions</p>
         </div>
       </div>
-      <TestEditor test={testForEditor} questions={questionsForEditor} languages={languages} apiBase="/api/manager" />
+      <TestEditor test={testForEditor} questions={questionsForEditor} languages={languagesForEditor} apiBase="/api/manager" />
     </div>
   );
 }

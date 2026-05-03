@@ -9,7 +9,7 @@ interface Course {
   id: number; title: string; level: string; is_published: boolean; is_public: boolean;
   created_at: string; enrollment_count: number;
   users: { id: number; name: string } | null;
-  languages: { id: number; name: string; flag_emoji: string } | null;
+  languages: { id: number; name: string; flag_emoji: string | null } | null;
   _count: { lessons: number; enrollments: number };
 }
 

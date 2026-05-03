@@ -61,7 +61,7 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
                 <h3 className="text-sm font-bold text-gray-900 mt-1 line-clamp-2">{lesson.course_title}</h3>
               </div>
               <div className="max-h-[70vh] overflow-y-auto scrollbar-thin">
-                {allLessons.map((l: { id: number; title: string; lesson_type: string; order_index: number }) => (
+                {(allLessons as { id: number; title: string; lesson_type: string; order_index: number }[]).map((l) => (
                   <Link
                     key={l.id}
                     href={`/learn/courses/${id}/lessons/${l.id}`}

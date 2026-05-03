@@ -10,9 +10,9 @@ export default async function ManagerNewCoursePage() {
   const session = await getSession();
   if (!await checkManagerPerm(session, "manage_courses")) redirect("/manager");
 
-  const languages = await prisma.languages.findMany({ where: { is_active: true }, orderBy: { name: "asc" }, select: { id: true, name: true, flag_emoji: true } });
+  const languages = await prisma.languages.findMany({ where: { is_active: true }, orderBy: { name: "asc" }, select: { id: true, name: true, flag_emoji: true } }).then(langs => langs.map(l => ({ ...l, flag_emoji: l.flag_emoji ?? "🌐" })));
 
-  const emptyCourse = { id: 0, title: "", description: null, cefr_level: "A1", language_id: 0, level: "beginner", duration_minutes: 0, is_published: false, is_public: false, flag_emoji: "📘", language_name: "" };
+  const emptyCourse = { id: 0, title: "", description: null, cefr_level: "A1", language_id: 0, level: "beginner", duration_minutes: 0, is_published: false, is_public: false, tags: null, flag_emoji: "🌐", language_name: "" };
 
   return (
     <div className="p-6 space-y-5">
@@ -28,7 +28,7 @@ export default async function ManagerNewCoursePage() {
           <p className="text-xs text-gray-500">Create a new course</p>
         </div>
       </div>
-      <CourseEditor course={emptyCourse} lessons={[]} languages={languages} apiBase="/api/manager" redirectOnCreate="/manager/courses" />
+      <CourseEditor course={emptyCourse} lessons={[]} languages={languages} apiBase="/api/manager" />
     </div>
   );
 }

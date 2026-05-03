@@ -27,16 +27,20 @@ export default async function ManagerCourseEditPage({ params }: { params: Promis
   const courseForEditor = {
     id: course.id, title: course.title, description: course.description,
     cefr_level: course.level, language_id: course.language_id ?? 0,
-    level: course.level, duration_minutes: course.duration_minutes,
+    level: course.level, duration_minutes: course.duration_minutes ?? 0,
     is_published: course.is_published, is_public: course.is_public,
-    flag_emoji: course.languages?.flag_emoji ?? "📘",
+    tags: course.tags as string[] | null,
+    flag_emoji: course.languages?.flag_emoji ?? "🌐",
     language_name: course.languages?.name ?? "",
   };
 
   const lessonsForEditor = lessons.map((l) => ({
-    id: l.id, title: l.title, content: l.content, content_type: l.content_type,
-    duration_minutes: l.duration_minutes, order_index: l.order_index, is_published: l.is_published,
+    id: l.id, title: l.title, content: l.content, lesson_type: l.lesson_type,
+    duration_minutes: l.duration_minutes ?? 0, order_index: l.order_index, is_published: l.is_published,
   }));
+
+  const languagesForEditor = languages.map((l) => ({ id: l.id, name: l.name, flag_emoji: l.flag_emoji ?? "🌐" }));
+
 
   return (
     <div className="p-6 space-y-5">
@@ -52,7 +56,7 @@ export default async function ManagerCourseEditPage({ params }: { params: Promis
           <p className="text-xs text-gray-500">Edit course details and lessons</p>
         </div>
       </div>
-      <CourseEditor course={courseForEditor} lessons={lessonsForEditor} languages={languages} apiBase="/api/manager" />
+      <CourseEditor course={courseForEditor} lessons={lessonsForEditor} languages={languagesForEditor} apiBase="/api/manager" />
     </div>
   );
 }

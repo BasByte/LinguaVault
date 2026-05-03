@@ -3,7 +3,7 @@ import AdminTestsTable from "@/components/admin/AdminTestsTable";
 import { FlaskConical } from "lucide-react";
 
 export default async function AdminTestsPage() {
-  const tests = await prisma.tests.findMany({
+  const testsResult = await prisma.tests.findMany({
     orderBy: { created_at: "desc" },
     include: {
       users: { select: { id: true, name: true } },
@@ -12,10 +12,14 @@ export default async function AdminTestsPage() {
     },
   });
 
-  const serialized = tests.map((t) => ({
+  const serialized = testsResult.map((t) => ({
     ...t,
     created_at: t.created_at.toISOString(),
-    updated_at: t.updated_at.toISOString(),
+    flag_emoji: t.languages?.flag_emoji ?? undefined,
+    language_name: t.languages?.name,
+    educator_name: t.users?.name,
+    question_count: t._count.test_questions,
+    attempt_count: t._count.test_attempts,
   }));
 
   return (
@@ -26,7 +30,7 @@ export default async function AdminTestsPage() {
         </div>
         <div>
           <h1 className="text-xl font-black text-gray-900">Tests</h1>
-          <p className="text-xs text-gray-500">{tests.length} total tests</p>
+          <p className="text-xs text-gray-500">{testsResult.length} total tests</p>
         </div>
       </div>
       <AdminTestsTable tests={serialized} />

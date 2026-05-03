@@ -9,7 +9,7 @@ export default async function AdminTestEditPage({ params }: { params: Promise<{ 
   const { id } = await params;
   const testId = parseInt(id);
 
-  const [test, questions, languages] = await Promise.all([
+  const [test, questions, languagesResult] = await Promise.all([
     prisma.tests.findUnique({
       where: { id: testId },
       include: { languages: { select: { name: true, flag_emoji: true } } },
@@ -20,6 +20,11 @@ export default async function AdminTestEditPage({ params }: { params: Promise<{ 
     }),
     prisma.languages.findMany({ where: { is_active: true }, orderBy: { name: "asc" }, select: { id: true, name: true, flag_emoji: true } }),
   ]);
+
+  const languages = languagesResult.map((l) => ({
+    ...l,
+    flag_emoji: l.flag_emoji ?? "🌐",
+  }));
 
   if (!test) notFound();
 

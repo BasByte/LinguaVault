@@ -4,10 +4,15 @@ import { FlaskConical, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
 export default async function AdminNewTestPage() {
-  const [languages, educators] = await Promise.all([
+  const [languagesResult, educators] = await Promise.all([
     prisma.languages.findMany({ where: { is_active: true }, orderBy: { name: "asc" }, select: { id: true, name: true, flag_emoji: true } }),
     prisma.users.findMany({ where: { role: "educator", is_active: true }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
   ]);
+
+  const languages = languagesResult.map((l) => ({
+    ...l,
+    flag_emoji: l.flag_emoji ?? "🌐",
+  }));
 
   return (
     <div className="p-6 space-y-5 max-w-2xl">

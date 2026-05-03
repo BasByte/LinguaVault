@@ -10,7 +10,7 @@ export default async function ManagerNewTestPage() {
   const session = await getSession();
   if (!await checkManagerPerm(session, "manage_tests")) redirect("/manager");
 
-  const languages = await prisma.languages.findMany({ where: { is_active: true }, orderBy: { name: "asc" }, select: { id: true, name: true, flag_emoji: true } });
+  const languages = await prisma.languages.findMany({ where: { is_active: true }, orderBy: { name: "asc" }, select: { id: true, name: true, flag_emoji: true } }).then(langs => langs.map(l => ({ ...l, flag_emoji: l.flag_emoji ?? "🌐" })));
 
   const emptyTest = { id: 0, title: "", description: null, cefr_level: "A1", language_id: 0, duration_minutes: 60, passing_score: 60, is_published: false, is_public: false, flag_emoji: "📋", language_name: "" };
 
@@ -28,7 +28,7 @@ export default async function ManagerNewTestPage() {
           <p className="text-xs text-gray-500">Create a new assessment</p>
         </div>
       </div>
-      <TestEditor test={emptyTest} questions={[]} languages={languages} apiBase="/api/manager" redirectOnCreate="/manager/tests" />
+      <TestEditor test={emptyTest} questions={[]} languages={languages} apiBase="/api/manager" />
     </div>
   );
 }

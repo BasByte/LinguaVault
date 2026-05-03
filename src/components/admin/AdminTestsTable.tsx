@@ -9,7 +9,7 @@ interface Test {
   id: number; title: string; cefr_level: string; is_published: boolean; is_public: boolean;
   duration_minutes: number; passing_score: number; attempt_count: number; created_at: string;
   users: { id: number; name: string } | null;
-  languages: { id: number; name: string; flag_emoji: string } | null;
+  languages: { id: number; name: string; flag_emoji: string | null } | null;
   _count: { test_questions: number; test_attempts: number };
 }
 
